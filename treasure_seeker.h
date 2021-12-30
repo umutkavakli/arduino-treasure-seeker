@@ -23,6 +23,7 @@ void toDown();
 void toRight();
 void toLeft();
 void characterInitializer();
+void startCreatures();
 
 
 

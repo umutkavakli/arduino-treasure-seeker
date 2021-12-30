@@ -1,19 +1,14 @@
 // Do not remove the include below
 #include "treasure_seeker.h"
+#include "Arduino.h"
 #include "avr/io.h"
 #include "util/delay.h"
-#include "Arduino.h"
 #include <LiquidCrystal.h>
 #include "hd44780/HD44780.hpp"
 
 #define THRESHOLD 51
 
-void toUp();
-void toDown();
-void toRight();
-void toLeft();
-void characterInitializer();
-void startCreatures();
+void creatureChecker(int x, int y, int port, uint8_t creature);
 
 const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
@@ -24,6 +19,7 @@ int robotx, roboty;
 int sadx, sady;
 int treasurex, treasurey;
 int hor = 7, ver = 1;
+int status;
 
 int main(void)
 {
@@ -38,8 +34,6 @@ int main(void)
 	lcd.begin(16, 2);
 	lcd.setCursor(7,1);
 	lcd.write(byte(0));
-
-
 
 	while(1){
 
@@ -59,26 +53,22 @@ int main(void)
 			toDown();
 		}
 
-		//if (humanx == treasurex && humany == treasurey) break;
+		if (humanx == treasurex && humany == treasurey){
+			status = 1;
+			break;
+		};
 
-
-		if (humanx >= treasurex && humany >= treasurey && humanx - treasurex <= 7 && humany - treasurey <= 1){
-				lcd.clear();
-				lcd.setCursor(hor, ver);
-				lcd.write(byte(0));
-				lcd.setCursor(7 - (humanx - treasurex), 1 - (humany-treasurey));
-				lcd.write("*");
-		}else if(humanx <= treasurex && humany >= treasurey && treasurex - humanx <= 6 && humany - treasurey <= 1){
-				lcd.clear();
-				lcd.setCursor(hor, ver);
-				lcd.write(byte(0));
-				lcd.setCursor(7+(treasurex-humanx), 1 - (humany-treasurey));
-				lcd.write("*");
-		}else{
-			lcd.clear();
-			lcd.setCursor(hor, ver);
-			lcd.write(byte(0));
+		if ((humanx == dinox && humany == dinoy) || (humanx == robotx && humany == roboty) || (humanx == sadx && humany == sady)){
+			status = 0;
+			break;
 		}
+
+		creatureChecker(treasurex, treasurey, 5, 11111000);
+		/*creatureChecker(dinox, dinoy, 4, byte(1));
+		creatureChecker(robotx, roboty, 3, byte(2));
+		creatureChecker(sadx, sady, 2, byte(3));*/
+
+
 
 
 
@@ -88,7 +78,10 @@ int main(void)
 
 	lcd.clear();
 	lcd.setCursor(4,0);
-	lcd.write("YOU WON!");
+	if (status)
+		lcd.write("YOU WON!");
+	else
+		lcd.write("YOU LOST!");
 }
 
 void toUp(){
@@ -119,7 +112,7 @@ void toUp(){
 		lcd.println(humany);
 	}
 
-	_delay_ms(500);
+	_delay_ms(100);
 
 }
 
@@ -146,7 +139,7 @@ void toDown(){
 		lcd.println(humany);
 	}
 
-	_delay_ms(500);
+	_delay_ms(100);
 }
 
 void toRight(){
@@ -177,11 +170,12 @@ void toRight(){
 		lcd.println(humanx);
 	}
 
-	_delay_ms(500);
+	_delay_ms(100);
 }
 
 void toLeft(){
 	if (humanx != 0) humanx--;
+
 	if (humanx <= 7){
 		hor = humanx;
 		lcd.clear();
@@ -193,6 +187,7 @@ void toLeft(){
 		lcd.setCursor(hor, ver);
 		lcd.write(byte(0));
 	}
+
 	lcd.setCursor(15, 0);
 	lcd.write((byte)7);
 
@@ -206,18 +201,69 @@ void toLeft(){
 		lcd.println(humanx);
 	}
 
-	_delay_ms(500);
+	_delay_ms(100);
 }
+
 
 void startCreatures(){
 	dinox = random(THRESHOLD), dinoy = random(THRESHOLD);
 	robotx = random(THRESHOLD), roboty = random(THRESHOLD);
 	sadx = random(THRESHOLD), sady = random(THRESHOLD);
-	treasurex = 30, treasurey = 30;
+	treasurex = 1, treasurey = 0;
 	_delay_ms(100);
 }
 
 
+void creatureChecker(int x, int y, int port, uint8_t creature){
+	int distance;
+
+	if (humanx >= x && humany >= y && humanx - x <= 7 && humany - y <= 1){
+			lcd.clear();
+			lcd.setCursor(hor, ver);
+			lcd.write(byte(0));
+
+			if (7 - (humanx - x) <= x && y <= 1)
+				lcd.setCursor(7 - (humanx - x), y);
+			else if (x <= 7 && y <= 1)
+				lcd.setCursor(x, y);
+			else if (x <= 7 && y > 1)
+				lcd.setCursor(x, 1 - (humany - y));
+			else
+				lcd.setCursor(7 - (humanx - x), 1 - (humany - y));
+			lcd.write(creature);
+
+	}else if(humanx <= x && humany >= y && x - humanx <= 6 && humany - y <= 1){
+			lcd.clear();
+			lcd.setCursor(hor, ver);
+			lcd.write(byte(0));
+			if (x <= 7 && y <= 1)
+				lcd.setCursor(x, y);
+			else if (x <= 7 && y > 1)
+				lcd.setCursor(x, 1 - (humany - y));
+			else
+				lcd.setCursor(7 + (x - humanx), 1 - (humany - y));
+			lcd.write(creature);
+
+	}else{
+		lcd.clear();
+		lcd.setCursor(hor, ver);
+		lcd.write(byte(0));
+	}
+
+	distance = sqrt(pow(humanx - x, 2) + pow(humany - y, 2));
+	if (distance <= 10){
+		PORTB ^= (1 << port);
+		_delay_ms(100);
+	}else if (distance <= 15){
+		PORTB ^= (1 << port);
+		_delay_ms(200);
+	}else if(distance <= 20){
+		PORTB ^= (1 << port);
+		_delay_ms(300);
+	}else{
+		PORTB |= (1 << port);
+	}
+}
 
 
 void characterInitializer(){

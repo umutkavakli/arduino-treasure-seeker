@@ -8,10 +8,7 @@
 #define _treasure_seeker_H_
 #include "Arduino.h"
 //add your includes for the project treasure_seeker here
-#define LINEX_LEFT 0
-#define LINEX_RIGHT 51
-#define LINEY_UPPER 0
-#define LINEY_LOWER 51
+#define THRESHOLD 51
 
 
 //end of add your includes here
@@ -24,7 +21,7 @@ void toRight();
 void toLeft();
 void characterInitializer();
 void startCreatures();
-
+void creatureChecker(int x, int y, int port, uint8_t creature);
 
 
 //Do not add code below this line

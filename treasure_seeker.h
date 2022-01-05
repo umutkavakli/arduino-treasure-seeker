@@ -8,7 +8,7 @@
 #define _treasure_seeker_H_
 #include "Arduino.h"
 //add your includes for the project treasure_seeker here
-#define THRESHOLD 51
+#define THRESHOLD 31
 
 
 //end of add your includes here

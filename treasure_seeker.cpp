@@ -2,8 +2,11 @@
 #include "Arduino.h"
 #include "avr/io.h"
 #include "util/delay.h"
-#include <LiquidCrystal.h>
+#include "stdlib.h"
+#include "time.h"
 #include "hd44780/HD44780.hpp"
+#include <avr/eeprom.h>
+#include <LiquidCrystal.h>
 
 const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
@@ -14,15 +17,22 @@ int robotx, roboty;
 int sadx, sady;
 int treasurex, treasurey;
 int hor = 7, ver = 1;
-int status;
 
 int main(void)
 {
+	char str1[20];
+	int status;
+	int sec = 0;
+	int min = 0;
+
+	uint16_t seed = eeprom_read_word(0);
+	randomSeed(seed++); //Returning random numbers every time to assign location of characters
+	eeprom_write_word(0, seed);
+
 	DDRB |= (1 << DDB2) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5); //Setting LEDs as output
 	PORTB |= (1<<PORTB2) | (1<<PORTB3) | (1<<PORTB4) | (1<<PORTB5); //Setting LEDs as 1 - HIGH at the first time (Don't blink)
 	DDRD &= ~(1<<DDD0) | ~(1<<DDD1) | ~(1<<DDD2) | ~(1<<DDD3); //Setting buttons as input
 
-	randomSeed(analogRead(0)); //Returning random numbers every time to assign location of characters
 	characterInitializer();
 	startCreatures();
 
@@ -34,18 +44,22 @@ int main(void)
 
 		if (!(PIND & 1 << PIND0)){
 			toUp();
+			_delay_ms(500);
 		}
 
 		if (!(PIND & 1 << PIND1)){
 			toRight();
+			_delay_ms(500);
 		}
 
 		if (!(PIND & 1 << PIND2)){
 			toLeft();
+			_delay_ms(500);
 		}
 
 		if (!(PIND & 1 << PIND3)){
 			toDown();
+			_delay_ms(500);
 		}
 
 		//If you find the treasure, return 1 to show that you won
@@ -64,14 +78,24 @@ int main(void)
 		creatureChecker(dinox, dinoy, 4, byte(1));
 		creatureChecker(robotx, roboty, 3, byte(2));
 		creatureChecker(sadx, sady, 2, byte(3));
+
+		sec++;
 	}
+
+	min = sec / 60;
+	sec = sec % 60;
+	sprintf(str1, "Time: %d:%d", min, sec);
 
 	lcd.clear();
 	lcd.setCursor(4,0);
+
 	if (status)
 		lcd.write("YOU WON!");
 	else
 		lcd.write("YOU LOST!");
+
+	lcd.setCursor(0,1);
+	lcd.print(str1);
 }
 
 void creatureChecker(int x, int y, int port, uint8_t creature){
@@ -99,6 +123,7 @@ void creatureChecker(int x, int y, int port, uint8_t creature){
 			else
 				lcd.setCursor(7 - (humanx - x), 1 - (humany - y));
 			lcd.write(creature);
+			_delay_ms(100);
 
 	}else if (humanx <= x && x - humanx <= 7 && humany - y >= 0 && humany - y <= 1){
 			lcd.clear();
@@ -115,8 +140,9 @@ void creatureChecker(int x, int y, int port, uint8_t creature){
 			else if (THRESHOLD - humanx <= 7)
 				lcd.setCursor(13 - (THRESHOLD - x), 1 - (humany - y));
 			else
-				lcd.setCursor(6 + (x - humanx), 1 - (humany - y));
+				lcd.setCursor(7 + (x - humanx), 1 - (humany - y));
 			lcd.write(creature);
+			_delay_ms(100);
 
 	}else{
 		//If there is no anything but your character, to show it
@@ -129,7 +155,7 @@ void creatureChecker(int x, int y, int port, uint8_t creature){
 	/*Calculating distance between your character and other creatures or treasure
 	 * after that, to show proximity blink LED if it's close to you more than 15 units*/
 	distance = sqrt(pow(humanx - x, 2) + pow(humany - y, 2));
-	if (distance <= 15){
+	if (distance <= 10){
 		PORTB ^= (1 << port);
 		_delay_ms(100);
 	}else{
@@ -165,8 +191,6 @@ void toUp(){
 		lcd.setCursor(14, 1);
 		lcd.println(humany);
 	}
-
-	_delay_ms(100);
 }
 
 void toDown(){
@@ -191,8 +215,6 @@ void toDown(){
 		lcd.setCursor(14, 1);
 		lcd.println(humany);
 	}
-
-	_delay_ms(100);
 }
 
 void toRight(){
@@ -222,8 +244,6 @@ void toRight(){
 		lcd.setCursor(14, 1);
 		lcd.println(humanx);
 	}
-
-	_delay_ms(100);
 }
 
 void toLeft(){
@@ -253,16 +273,14 @@ void toLeft(){
 		lcd.setCursor(14, 1);
 		lcd.println(humanx);
 	}
-
-	_delay_ms(100);
 }
 
 void startCreatures(){
 	//Assign random location numbers in x and y dimensions from 0 to THRESHOLD
-	dinox = random(THRESHOLD), dinoy = random(THRESHOLD);
-	robotx = random(THRESHOLD), roboty = random(THRESHOLD);
-	sadx = random(THRESHOLD), sady = random(THRESHOLD);
-	treasurex = random(THRESHOLD), treasurey = random(THRESHOLD);
+	dinox = random()%THRESHOLD, dinoy = random()%THRESHOLD;
+	robotx = random()%THRESHOLD, roboty = random()%THRESHOLD;
+	sadx = random()%THRESHOLD, sady = random()%THRESHOLD;
+	treasurex = random()%THRESHOLD, treasurey = random()%THRESHOLD;
 	_delay_ms(100);
 }
 

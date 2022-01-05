@@ -10,9 +10,9 @@ treasure_seeker.cpp.o: ../treasure_seeker.cpp ../treasure_seeker.h \
  /home/ginger/Sloeber/arduinoPlugin/packages/arduino/hardware/avr/1.8.3/cores/arduino/USBAPI.h \
  /home/ginger/Sloeber/arduinoPlugin/packages/arduino/hardware/avr/1.8.3/cores/arduino/Arduino.h \
  /home/ginger/Sloeber/arduinoPlugin/packages/arduino/hardware/avr/1.8.3/variants/standard/pins_arduino.h \
+ ../hd44780/HD44780.hpp \
  /home/ginger/Sloeber/arduinoPlugin/libraries/LiquidCrystal/1.0.7/src/LiquidCrystal.h \
- /home/ginger/Sloeber/arduinoPlugin/packages/arduino/hardware/avr/1.8.3/cores/arduino/Print.h \
- ../hd44780/HD44780.hpp
+ /home/ginger/Sloeber/arduinoPlugin/packages/arduino/hardware/avr/1.8.3/cores/arduino/Print.h
 
 ../treasure_seeker.h:
 
@@ -38,8 +38,8 @@ treasure_seeker.cpp.o: ../treasure_seeker.cpp ../treasure_seeker.h \
 
 /home/ginger/Sloeber/arduinoPlugin/packages/arduino/hardware/avr/1.8.3/variants/standard/pins_arduino.h:
 
+../hd44780/HD44780.hpp:
+
 /home/ginger/Sloeber/arduinoPlugin/libraries/LiquidCrystal/1.0.7/src/LiquidCrystal.h:
 
 /home/ginger/Sloeber/arduinoPlugin/packages/arduino/hardware/avr/1.8.3/cores/arduino/Print.h:
-
-../hd44780/HD44780.hpp:

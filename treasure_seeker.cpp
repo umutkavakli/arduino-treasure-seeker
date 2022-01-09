@@ -24,6 +24,7 @@ int main(void)
 	int status;
 	int sec = 0;
 	int min = 0;
+	int start = 1;
 
 	uint16_t seed = eeprom_read_word(0);
 	randomSeed(seed++); //Returning random numbers every time to assign location of characters
@@ -37,7 +38,26 @@ int main(void)
 	startCreatures();
 
 	lcd.begin(16, 2); //Start LCD
-	lcd.setCursor(7,1);
+
+	//To start press any button
+	while(start){
+		for(int i = 15; i >= 0; i--){
+		    lcd.setCursor(i, 1);
+		    lcd.print("PRESS TO START!");
+		    lcd.setCursor(0, 0);
+		    lcd.print("TREASURE  SEEKER");
+		    lcd.setCursor(14, 0);
+		    _delay_ms(400);
+		    lcd.clear();
+		    if (!(PIND & 1 << PIND0) || !(PIND & 1 << PIND1) || !(PIND & 1 << PIND2) || !(PIND & 1 << PIND3)){
+		    	start = 0;
+		    	break;
+		    }
+		  }
+	}
+
+	_delay_ms(500);
+	lcd.setCursor(hor, ver);
 	lcd.write(byte(0));
 
 	while(1){
@@ -84,7 +104,7 @@ int main(void)
 
 	min = sec / 60;
 	sec = sec % 60;
-	sprintf(str1, "Time: %d:%d", min, sec);
+	sprintf(str1, "TIME: %d:%d", min, sec);
 
 	lcd.clear();
 	lcd.setCursor(4,0);
@@ -106,7 +126,6 @@ void creatureChecker(int x, int y, int port, uint8_t creature){
 			lcd.clear();
 			lcd.setCursor(hor, ver);
 			lcd.write(byte(0));
-
 
 			if (7 - (humanx - x) <= x && y <= 1 && humany <= 1 && humanx <= 7)
 				lcd.setCursor(7 - (humanx - x), y);

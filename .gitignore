@@ -1,2 +1,4 @@
 spec.d
-/Release/
+Release/*
+.settings/*
+*project

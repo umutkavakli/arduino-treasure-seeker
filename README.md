@@ -17,7 +17,8 @@ You can find more information about the AVT1615 shield from the link below <br/>
 ![lcd](images/lcd.jpeg) <br/><br/>
 
 ## Project
-It is a game project that you can play with 4 buttons on AVT1615 Shield. LCD show us a part of map whose size can be changed (default 31x31). <br/>
+It is a game project that you can play with 4 buttons on AVT1615 Shield. LCD
+show us a part of map whose size can be changed (default 29x29). <br/>
 ![map](images/map.jpeg) <br/><br/>
 
 #### Characters
